@@ -29,6 +29,12 @@ initializeDb().catch(err => {
     process.exit(1);
 });
 
+// Middleware para tratar erros de SQL
+function handleSQLError(res, err) {
+    console.error('Erro ao executar consulta SQL:', err);
+    res.status(500).json({ error: 'Erro ao processar a requisição.' });
+}
+
 // Endpoint para registrar um novo usuário
 app.post('/api/register', async (req, res) => {
     const { first_name, last_name, email, password, username } = req.body;
@@ -55,53 +61,59 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ error: 'Credenciais inválidas.' });
         }
         console.log(`Usuário ${row.first_name} logado com sucesso!`);
-        res.json({ message: 'Login bem-sucedido.', user: row });
+
+        res.status(200).json({ message: 'Login bem-sucedido.', user: row });
     } catch (err) {
         console.error('Erro ao fazer login:', err);
         res.status(500).json({ error: 'Erro ao fazer login.' });
     }
 });
 
-// Endpoint para obter favoritos de um usuário
-app.get('/api/favorites/:userId', (req, res) => {
-    const { userId } = req.params;
-    const sql = 'SELECT * FROM favorites WHERE userId = ?';
-
-    db.all(sql, [userId], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao buscar favoritos.' });
-        }
-        res.json(rows);
-    });
-});
-
 // Endpoint para adicionar favorito para um usuário
 app.post('/api/favorites', (req, res) => {
     const { userId, coinId, coinName } = req.body;
-    const sql = 'INSERT INTO favorites (userId, coinId, coinName) VALUES (?, ?, ?)';
+    const sql = 'INSERT or IGNORE INTO favorites (userId, coinId, coinName) VALUES (?, ?, ?)';
 
     db.run(sql, [userId, coinId, coinName], function (err) {
         if (err) {
+            console.error('Erro ao executar consulta SQL:', err);
             return res.status(500).json({ error: 'Erro ao adicionar favorito.' });
         }
-        res.json({ message: 'Favorito adicionado com sucesso.' });
     });
+
+    // TODO: acho que é gambiarra
+    res.status(200).json({ message: 'Favorito adicionado com sucesso.' });
+
+});
+
+
+// Endpoint para obter favoritos de um usuário
+app.get('/api/favorites/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT * FROM favorites WHERE userId = ?';
+
+    try {
+        const rows = await db.all(sql, [userId]);
+        res.json(rows); // Retorna os favoritos encontrados em formato JSON
+    } catch (err) {
+        console.error('Erro ao buscar favoritos:', err);
+        res.status(500).json({ error: 'Erro ao buscar favoritos.' });
+    }
 });
 
 // Endpoint para remover favorito de um usuário
-app.delete('/api/favorites/:userId/:coinId', (req, res) => {
+app.delete('/api/favorites/:userId/:coinId', async (req, res) => {
     const { userId, coinId } = req.params;
     const sql = 'DELETE FROM favorites WHERE userId = ? AND coinId = ?';
 
-    db.run(sql, [userId, coinId], function (err) {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao remover favorito.' });
-        }
+    try {
+        await db.run(sql, [userId, coinId]);
         res.json({ message: 'Favorito removido com sucesso.' });
-    });
+    } catch (err) {
+        console.error('Erro ao remover favorito:', err);
+        res.status(500).json({ error: 'Erro ao remover favorito.' });
+    }
 });
-
-// Outros endpoints e configurações do servidor...
 
 // Iniciar o servidor
 app.listen(port, () => {

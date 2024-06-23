@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 function LogIn() {
     const [username, setUsername] = useState('');
@@ -36,7 +37,16 @@ function LogIn() {
             if (!response.ok) {
                 throw new Error('Erro ao fazer login.');
             }
-            
+
+            const result = await response.json();
+            const userId = result.user.id;
+
+            // Armazenar o userId no cookie
+            Cookies.set('userId', userId, {
+                expires: 7,
+                sameSite: 'Lax' // Definir SameSite como Lax
+            });
+
             // Redirecionar ou executar outra ação após o login bem-sucedido
             navigate('/home'); // Exemplo de redirecionamento para a página inicial
         } catch (error) {

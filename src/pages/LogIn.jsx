@@ -1,39 +1,60 @@
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Link } from 'react-router-dom';
-import Register from './Register';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Link, useNavigate } from 'react-router-dom';
 
 function LogIn() {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-    const handleEmailChange = (e) => {
-        setEmail(e.target.value);
+    const handleUsernameChange = (e) => {
+        setUsername(e.target.value);
     };
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add your login logic here
-    };
 
+        const loginData = {
+            username: username,
+            password: password
+        };
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao fazer login.');
+            }
+            
+            // Redirecionar ou executar outra ação após o login bem-sucedido
+            navigate('/home'); // Exemplo de redirecionamento para a página inicial
+        } catch (error) {
+            console.error('Erro ao fazer login:', error);
+            alert('Credenciais inválidas. Por favor, tente novamente.');
+        }
+    };
 
     return (
         <div className='bg-slate-300 max-w-fit p-5'>
-            <h2 className='text-center '>Login</h2>
+            <h2 className='text-center'>Login</h2>
             <br />
-            <form onSubmit={handleSubmit} >
+            <form onSubmit={handleSubmit}>
                 <label>
-
-                    <Input type="email" value={email} onChange={handleEmailChange} placeholder="Email" />
+                    <Input type="text" value={username} onChange={handleUsernameChange} placeholder="Usuário" />
                 </label>
                 <br />
                 <label>
-
                     <Input type="password" value={password} onChange={handlePasswordChange} placeholder="Senha" />
                 </label>
                 <br />
@@ -41,10 +62,9 @@ function LogIn() {
                 <Button asChild className='bg-gray-600 p-2 px-4 m-4'>
                     <Link to="/register">Register</Link>
                 </Button>
-
             </form>
         </div>
     );
-};
+}
 
 export default LogIn;

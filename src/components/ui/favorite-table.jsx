@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
-function HomeTable() {
+function FavoriteTable() {
     const [data, setData] = useState([]);
     const [favorites, setFavorites] = useState([]);
 
@@ -24,7 +24,6 @@ function HomeTable() {
         setFavorites(savedFavorites);
     }, []);
 
-
     const toggleFavorite = (coin) => {
         const isFavorite = favorites.some(fav => fav.id === coin.id);
         const updatedFavorites = isFavorite
@@ -34,6 +33,9 @@ function HomeTable() {
         setFavorites(updatedFavorites);
         localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
     };
+
+    // Filtra os dados para exibir apenas os favoritos
+    const favoriteData = data.filter(coin => favorites.some(fav => fav.id === coin.id));
 
     return (
         <div className='flex justify-center mt-20'>
@@ -47,7 +49,7 @@ function HomeTable() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.sort((a, b) => b.price - a.price).map((row, index) => (
+                    {favoriteData.sort((a, b) => b.price - a.price).map((row, index) => (
                         <tr key={index}>
                             <td className='px-16 text-left'>{row.coin}</td>
                             <td className='px-16 text-left'>$ {row.price}</td>
@@ -68,4 +70,4 @@ function HomeTable() {
     );
 }
 
-export default HomeTable;
+export default FavoriteTable;

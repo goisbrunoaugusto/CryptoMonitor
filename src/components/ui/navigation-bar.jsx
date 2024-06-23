@@ -21,7 +21,7 @@ function NavigationBar() {
                             </Link>
                         </NavigationMenuItem>
                         <NavigationMenuItem className='px-2'>
-                            <Link to="/" legacyBehavior passHref>
+                            <Link to="/favorites" legacyBehavior passHref>
                                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                     Favorites
                                 </NavigationMenuLink>

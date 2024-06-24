@@ -127,8 +127,14 @@ function Register() {
                 throw new Error('Erro ao registrar usuário.');
             }
 
+            // Limpar os campos do formulário ou resetar o estado
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setPassword('');
+            setUsername('');
+
             alert('Usuário cadastrado com sucesso!');
-            // Redirecionar ou executar outra ação após o registro bem-sucedido
         } catch (error) {
             console.error('Erro ao registrar usuário:', error);
             alert('Ocorreu um erro ao tentar registrar. Por favor, tente novamente.');

@@ -12,9 +12,9 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<LogIn />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
 
         {/* Private routes */}
-        <PrivateRoute path="/home" element={<Home />} />
         <PrivateRoute path="/favorites" element={<Favorites />} />
 
         {/* Redirect to login if no matching route */}

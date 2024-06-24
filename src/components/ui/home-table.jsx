@@ -9,7 +9,6 @@ function HomeTable() {
     const [userId, setUserId] = useState(null); // Estado para armazenar o userId
 
     useEffect(() => {
-        // Função para obter userId do cookie
         const fetchUserIdFromCookie = () => {
             const userIdFromCookie = Cookies.get('userId');
             if (userIdFromCookie) {
@@ -21,7 +20,6 @@ function HomeTable() {
 
         fetchUserIdFromCookie(); // Chamada inicial para carregar userId
 
-        // Fetch para obter dados de ativos
         fetch('https://api.coincap.io/v2/assets')
             .then(response => response.json())
             .then(data => {
@@ -35,7 +33,6 @@ function HomeTable() {
             })
             .catch(error => console.error('Error fetching assets:', error));
 
-        // Fetch para obter favoritos do usuário
         if (userId) {
             fetch(`/api/favorites/${userId}`)
                 .then(response => response.json())
@@ -47,18 +44,14 @@ function HomeTable() {
     }, [userId]);
 
     const toggleFavorite = async (coin) => {
-        const isFavorite = favorites.some(fav => fav.coinId === coin.id);
-        const updatedFavorites = isFavorite
-            ? favorites.filter(fav => fav.coinId !== coin.id)
-            : [...favorites, { coinId: coin.id, coinName: coin.coin }];
-
-        setFavorites(updatedFavorites);
-
         try {
+            const isFavorite = favorites.some(fav => fav.coinId === coin.id);
+
             if (isFavorite) {
                 await fetch(`/api/favorites/${userId}/${coin.id}`, {
                     method: 'DELETE',
                 });
+                setFavorites(favorites.filter(fav => fav.coinId !== coin.id));
             } else {
                 await fetch('/api/favorites', {
                     method: 'POST',
@@ -67,36 +60,36 @@ function HomeTable() {
                     },
                     body: JSON.stringify({ userId, coinId: coin.id, coinName: coin.coin }),
                 });
+                setFavorites([...favorites, { userId, coinId: coin.id, coinName: coin.coin }]);
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
         }
     };
 
-    // Função para verificar se um determinado coinId está presente nos favoritos
     const isFavorite = (coinId) => {
         return favorites.some(fav => fav.coinId === coinId);
     };
 
-    return (
-        <div className='flex justify-center mt-20'>
-            <table className='bg-slate-200 py-5 '>
-                <thead>
+    const renderTable = (tableData) => (
+        <div className='shadow-md rounded-lg overflow-hidden'>
+            <table className='min-w-full bg-slate-200'>
+                <thead className='bg-slate-200'>
                     <tr>
-                        <th className='px-16 text-left'>Coin</th>
-                        <th className='px-16 text-left'>Price</th>
-                        <th className='px-16 text-left'>% 24h</th>
-                        <th className='px-16 text-left'>Favorite</th>
+                        <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Coin</th>
+                        <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Price</th>
+                        <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>% 24h</th>
+                        <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Favorite</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {data.sort((a, b) => b.price - a.price).map((row, index) => (
-                        <tr key={index}>
-                            <td className='px-16 text-left'>{row.coin}</td>
-                            <td className='px-16 text-left'>$ {row.price}</td>
-                            <td className={`px-16 text-left ${row.change < 0 ? 'text-red-500' : 'text-green-500'}`}>{row.change}</td>
-                            <td className='px-16 flex justify-center'>
-                                <button onClick={() => toggleFavorite(row)}>
+                <tbody className='divide-y divide-gray-200'>
+                    {tableData.sort((a, b) => b.price - a.price).map((row, index) => (
+                        <tr key={index} className='bg-white'>
+                            <td className='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{row.coin}</td>
+                            <td className='px-4 py-4 whitespace-nowrap text-sm text-gray-700'>$ {row.price}</td>
+                            <td className={`px-4 py-4 whitespace-nowrap text-sm ${row.change < 0 ? 'text-red-700' : 'text-green-700'}`}>{row.change} %</td>
+                            <td className='px-4 py-4 whitespace-nowrap text-right text-sm font-medium'>
+                                <button onClick={() => toggleFavorite(row)} className='flex items-center justify-center'>
                                     {isFavorite(row.id)
                                         ? <HeartIconSolid className='h-6 w-6 text-red-500' />
                                         : <HeartIcon className='h-6 w-6' />
@@ -107,6 +100,26 @@ function HomeTable() {
                     ))}
                 </tbody>
             </table>
+        </div>
+    );
+
+    // Dividir os dados em duas colunas
+    const midIndex = Math.ceil(data.length / 2);
+    const firstColumnData = data.slice(0, midIndex);
+    const secondColumnData = data.slice(midIndex);
+
+    return (
+        <div className='flex justify-center mt-10 mb-10 px-4'>
+            <div className='w-full max-w-6xl'>
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+                    <div className='overflow-x-auto'>
+                        {renderTable(firstColumnData)}
+                    </div>
+                    <div className='overflow-x-auto'>
+                        {renderTable(secondColumnData)}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -6,10 +6,9 @@ import Cookies from 'js-cookie';
 function FavoriteTable() {
     const [data, setData] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    const [userId, setUserId] = useState(null); // Estado para armazenar o userId
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
-        // Função para obter userId do cookie
         const fetchUserIdFromCookie = () => {
             const userIdFromCookie = Cookies.get('userId');
             if (userIdFromCookie) {
@@ -19,9 +18,8 @@ function FavoriteTable() {
             }
         };
 
-        fetchUserIdFromCookie(); // Chamada inicial para carregar userId
+        fetchUserIdFromCookie();
 
-        // Fetch para obter dados de ativos
         fetch('https://api.coincap.io/v2/assets')
             .then(response => response.json())
             .then(data => {
@@ -35,7 +33,6 @@ function FavoriteTable() {
             })
             .catch(error => console.error('Error fetching assets:', error));
 
-        // Fetch para obter favoritos do usuário, se houver um userId válido
         if (userId) {
             fetch(`/api/favorites/${userId}`)
                 .then(response => response.json())
@@ -70,38 +67,41 @@ function FavoriteTable() {
         }
     };
 
-    // Filtra os dados para exibir apenas os favoritos
     const favoriteData = data.filter(coin => favorites.some(fav => fav.coinId === coin.id));
 
     return (
-        <div className='flex justify-center mt-20'>
-            <table className='bg-slate-200 py-5 '>
-                <thead>
-                    <tr>
-                        <th className='px-16 text-left'>Coin</th>
-                        <th className='px-16 text-left'>Price</th>
-                        <th className='px-16 text-left'>% 24h</th>
-                        <th className='px-16 text-left'>Favorite</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {favoriteData.sort((a, b) => b.price - a.price).map((row, index) => (
-                        <tr key={index}>
-                            <td className='px-16 text-left'>{row.coin}</td>
-                            <td className='px-16 text-left'>$ {row.price}</td>
-                            <td className={`px-16 text-left ${row.change < 0 ? 'text-red-500' : 'text-green-500'}`}>{row.change}</td>
-                            <td className='px-16 flex justify-center'>
-                                <button onClick={() => toggleFavorite(row)}>
-                                    {favorites.some(fav => fav.coinId === row.id)
-                                        ? <HeartIconSolid className='h-6 w-6 text-red-500' />
-                                        : <HeartIcon className='h-6 w-6' />
-                                    }
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <div className='flex justify-center mt-10 mb-10 px-4'>
+            <div className='w-full max-w-6xl overflow-x-auto'>
+                <div className='shadow-md rounded-lg overflow-hidden'>
+                    <table className='min-w-full bg-slate-200'>
+                        <thead className='bg-slate-200'>
+                            <tr>
+                                <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Coin</th>
+                                <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Price</th>
+                                <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>% 24h</th>
+                                <th className='px-4 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider'>Favorite</th>
+                            </tr>
+                        </thead>
+                        <tbody className='divide-y divide-gray-200'>
+                            {favoriteData.sort((a, b) => b.price - a.price).map((row, index) => (
+                                <tr key={index} className='bg-white'>
+                                    <td className='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>{row.coin}</td>
+                                    <td className='px-4 py-4 whitespace-nowrap text-sm text-gray-700'>$ {row.price}</td>
+                                    <td className={`px-4 py-4 whitespace-nowrap text-sm ${row.change < 0 ? 'text-red-700' : 'text-green-700'}`}>{row.change} %</td>
+                                    <td className='px-4 py-4 whitespace-nowrap text-right text-sm font-medium'>
+                                        <button onClick={() => toggleFavorite(row)} className='flex items-center justify-center'>
+                                            {favorites.some(fav => fav.coinId === row.id)
+                                                ? <HeartIconSolid className='h-6 w-6 text-red-500' />
+                                                : <HeartIcon className='h-6 w-6' />
+                                            }
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }

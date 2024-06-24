@@ -2,13 +2,7 @@
 
 import React from 'react';
 import { Route, Navigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-
-// Função ou hook para verificar autenticação
-const useAuth = () => {
-  const userId = Cookies.get('userId'); // Exemplo usando js-cookie
-  return !!userId; // Retorna true se userId existir, false caso contrário
-};
+import { useAuth } from '../utils/auth'; // Importe a função useAuth
 
 const PrivateRoute = ({ element, ...rest }) => {
   const isAuthenticated = useAuth();

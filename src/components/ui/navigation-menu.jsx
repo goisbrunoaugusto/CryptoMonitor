@@ -1,104 +1,132 @@
-import * as React from "react"
-import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
-import { cva } from "class-variance-authority"
-import { ChevronDown } from "lucide-react"
+import React from 'react';
+import { ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { cn } from "@/lib/utils"
+const NavigationMenuWrapper = styled.div`
+  position: relative;
+  z-index: 10;
+  display: flex;
+  max-width: max-content;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
 
-const NavigationMenu = React.forwardRef(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative z-10 flex max-w-max flex-1 items-center justify-center",
-      className
-    )}
-    {...props}>
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-))
-NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
+const NavigationMenuList = styled.ul`
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+`;
 
-const NavigationMenuList = React.forwardRef(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.List
-    ref={ref}
-    className={cn(
-      "group flex flex-1 list-none items-center justify-center space-x-1",
-      className
-    )}
-    {...props} />
-))
-NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
+const NavigationMenuItem = styled.li`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  transition: color 0.2s ease-in-out;
 
-const NavigationMenuItem = NavigationMenuPrimitive.Item
+  &:hover {
+    color: #1a202c;
+  }
+`;
 
-const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-)
+const NavigationMenuTrigger = styled.button`
+  background-color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 
-const NavigationMenuTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Trigger
-    ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", className)}
-    {...props}>
-    {children}{" "}
-    <ChevronDown
-      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
-      aria-hidden="true" />
-  </NavigationMenuPrimitive.Trigger>
-))
-NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName
+  &:hover {
+    background-color: #edf2f7;
+    color: #2d3748;
+  }
 
-const NavigationMenuContent = React.forwardRef(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Content
-    ref={ref}
-    className={cn(
-      "left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto ",
-      className
-    )}
-    {...props} />
-))
-NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  }
+`;
 
-const NavigationMenuLink = NavigationMenuPrimitive.Link
+const ChevronIcon = styled(ChevronDown)`
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  transition: transform 0.2s ease-in-out;
+`;
 
-const NavigationMenuViewport = React.forwardRef(({ className, ...props }, ref) => (
-  <div className={cn("absolute left-0 top-full flex justify-center")}>
-    <NavigationMenuPrimitive.Viewport
-      className={cn(
-        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
-        className
-      )}
-      ref={ref}
-      {...props} />
-  </div>
-))
-NavigationMenuViewport.displayName =
-  NavigationMenuPrimitive.Viewport.displayName
+const NavigationMenuContent = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  display: none;
+`;
 
-const NavigationMenuIndicator = React.forwardRef(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.Indicator
-    ref={ref}
-    className={cn(
-      "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
-      className
-    )}
-    {...props}>
-    <div
-      className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />
-  </NavigationMenuPrimitive.Indicator>
-))
-NavigationMenuIndicator.displayName =
-  NavigationMenuPrimitive.Indicator.displayName
+const NavigationMenuItemLink = styled(Link)`
+  display: block;
+  padding: 10px 16px;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+
+  &:hover {
+    color: #2d3748;
+  }
+`;
+
+const NavigationMenuTriggerWrapper = styled.div`
+  position: relative;
+`;
+
+function NavigationMenu({ children }) {
+  return (
+    <NavigationMenuWrapper>
+      <NavigationMenuList>{children}</NavigationMenuList>
+    </NavigationMenuWrapper>
+  );
+}
+
+function NavigationMenuTriggerComponent({ children }) {
+  return (
+    <NavigationMenuTriggerWrapper>
+      <NavigationMenuTrigger>
+        {children}
+        <ChevronIcon />
+      </NavigationMenuTrigger>
+    </NavigationMenuTriggerWrapper>
+  );
+}
+
+function NavigationMenuContentComponent({ children }) {
+  return <NavigationMenuContent>{children}</NavigationMenuContent>;
+}
 
 export {
-  navigationMenuTriggerStyle,
   NavigationMenu,
-  NavigationMenuList,
   NavigationMenuItem,
-  NavigationMenuContent,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
-  NavigationMenuIndicator,
-  NavigationMenuViewport,
-}
+  NavigationMenuTriggerComponent as NavigationMenuTrigger,
+  NavigationMenuContentComponent as NavigationMenuContent,
+  NavigationMenuItemLink as NavigationMenuLink,
+};
